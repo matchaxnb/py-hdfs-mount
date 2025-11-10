@@ -10,6 +10,8 @@ from hdfs import HdfsError
 from hdfs.client import Client
 from hdfs.ext.kerberos import KerberosClient
 import yaml
+import socket
+import urllib
 
 from utils import stat_to_attrs
 
@@ -26,6 +28,16 @@ ch.setFormatter(formatter)
 log.addHandler(ch)
 
 HDFS_BLOCK_SIZE = 2 * 27
+
+def reverse_dns(request_ip):
+    if socket.inet_aton(request_ip):
+        try:
+            r_dns = socket.gethostbyaddr(request_ip)
+        except:
+            logging.error('######## Host IP reverse DNS lookup failed. ########')
+    else:
+        logging.error('######## Host IP is not a valid IP address. ########')
+    return r_dns
 
 
 class HDFS(Operations):
@@ -584,13 +596,23 @@ if __name__ == '__main__':
         log.setLevel(logging.INFO)
 
     with open(args['CONFIG'], 'r') as f:
-        cfg = yaml.load(f)
+        cfg = yaml.load(f, Loader=yaml.SafeLoader)
 
     hdfs_server = cfg['hdfs']['server']
     hdfs_mount_root = cfg['hdfs']['mount_root']
     hdfs_user = cfg['hdfs']['hdfs_user']
     hdfs_group = cfg['hdfs']['hdfs_group']
     mount_dest_dir = cfg['mount']['dest_dir']
+    canonicalize_hostname = cfg['hdfs'].get('canonicalize_hostname', False)
+    if canonicalize_hostname:
+      parsed_hdfs = urllib.parse.urlparse(hdfs_server)
+      print(parsed_hdfs)
+      nhost, nport = parsed_hdfs.netloc.split(':', 1)
+      netloc_ip = socket.gethostbyname(nhost)
+      canonical = f'{reverse_dns(netloc_ip)[0]}:{nport}'
+      hdfs_server = urllib.parse.urlunparse(parsed_hdfs._replace(netloc=canonical))
+      print("New HDFS server:", hdfs_server)
+   
     if 'extra' in cfg['mount']:
         mount_extra_params = cfg['mount']['extra']
     else:
