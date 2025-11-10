@@ -1,5 +1,6 @@
 hdfs:
         server: http://hdfs_hostname:50070
+        canonicalize_hostname: False
         hdfs_user: "test"
         hdfs_group: "foobarbaz"
         mount_root: "/users/test"
@@ -7,6 +8,6 @@ hdfs:
 mount:
         dest_dir: /tmp/myhdfsmount
         extra:
-                allow_root: True
-                allow_other: True 
+                allow_root: False
+                allow_other: False
                 nothreads: False
