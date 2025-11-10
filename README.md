@@ -1,3 +1,21 @@
+# Purpose
+
+This is a FUSE based WebHDFS mounter. You may use it to access WebHDFS storage from your storage.
+
+It's not designed for efficiency or speed, but practicality.
+
+Features:
+
+- Kerberos support
+- Specifically for Kerberos, hostname canonicalization support as some Kerberos HA setups require it.
+- Doesn't require any local Hadoop config. Does not try to parse the Hadoop config.
+- Bare-bones support.
+
+Plans:
+
+- Asynchronous access to metadata in the future
+
+
 ### Requirements
 
 Python 3
